@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from typing import Optional, Dict, List
 import numpy as np
 from Peptide_sequence_lib.AminoAcid_Properties import AminoAcid_Properties
-
 import numpy as np
 from typing import Dict, List, Optional, Tuple
 from scipy.optimize import minimize, differential_evolution
