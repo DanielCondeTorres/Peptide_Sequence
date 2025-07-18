@@ -208,9 +208,9 @@ def main():
     parser.add_argument('--num_candidates', type=int, default=10, help='Número de péptidos candidatos a obtener')
     parser.add_argument('--optimizer', choices=['COBYLA', 'differential_evolution'], default='COBYLA', help='Optimizador a usar en modo quantum')
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('--use_qaoa', dest='use_qaoa', action='store_true', help='Usar QAOA')
-    group.add_argument('--no_use_qaoa', dest='use_qaoa', action='store_false', help='No usar QAOA (usar VQE)')
-    parser.set_defaults(use_qaoa=True)
+    parser.add_argument('--algorithm', type=str, choices=['qaoa', 'vqe', 'annealer'], default='vqe',
+                    help='Algoritmo cuántico a usar: qaoa, vqe o annealer (default: vqe)')
+
 
     args = parser.parse_args()
 
@@ -232,7 +232,7 @@ def main():
         use_classical=(args.mode == 'classical'),
         maxiter_cobyla=args.maxiter_cobyla,
         optimizer=args.optimizer,
-        use_qaoa = args.use_qaoa
+        algorithm=args.algorithm,
     )
 
     # Imprimir resultados

@@ -17,7 +17,7 @@ class PeptideDesigner:
     
     def design_peptides(self, target: ProteinTarget, peptide_length: int = 10,
                        num_candidates: int = 10, constraints: Optional[Dict] = None,
-                       use_classical: bool = False, maxiter_cobyla: int = 100, optimizer: str = 'COBYLA', use_qaoa: bool = True) -> List[PeptideCandidate]:
+                       use_classical: bool = False, maxiter_cobyla: int = 100, optimizer: str = 'COBYLA', algorithm: str = 'vqe') -> List[PeptideCandidate]:
         """Design peptides for a given target"""
         logger.info(f"Designing peptides for target: {target.name}")
         
@@ -27,7 +27,7 @@ class PeptideDesigner:
         # Quantum optimization
         solutions = self.quantum_optimizer.optimize_peptide(
             peptide_length, constraints, num_reads=num_candidates * 100,
-            use_classical=use_classical, maxiter_cobyla=maxiter_cobyla, optimizer=optimizer, use_qaoa=use_qaoa
+            use_classical=use_classical, maxiter_cobyla=maxiter_cobyla, optimizer=optimizer, algorithm=algorithm
         )
         
         if solutions is None:
