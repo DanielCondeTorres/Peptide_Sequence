@@ -1,0 +1,14 @@
+name: qiskit-protein-env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - matplotlib
+  - notebook
+  - pip:
+      - qiskit==0.43.0
+      - qiskit-optimization==0.5.0
+      - qiskit-algorithms==0.2.1
