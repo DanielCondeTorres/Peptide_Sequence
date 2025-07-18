@@ -6,6 +6,7 @@ Implementation based on arXiv:2503.05458
 This framework integrates classical and quantum computing for peptide design
 using D-Wave quantum annealer for optimization.
 """
+
 import qiskit
 import qiskit_aer
 print(qiskit.__version__)
@@ -71,101 +72,17 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-@dataclass
-class PeptideCandidate:
-    """Represents a peptide candidate with properties"""
-    sequence: str
-    binding_affinity: float
-    stability: float
-    druggability: float
-    diversity_score: float
-    total_score: float
-    
-class AminoAcidProperties:
-    """Amino acid properties for peptide design"""
-    
-    def __init__(self):
-        # Standard amino acids
-        self.amino_acids = ['A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I',
-                           'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V']
-        
-        # Hydrophobicity (Kyte-Doolittle scale)
-        self.hydrophobicity = {
-            'A': 1.8, 'R': -4.5, 'N': -3.5, 'D': -3.5, 'C': 2.5,
-            'Q': -3.5, 'E': -3.5, 'G': -0.4, 'H': -3.2, 'I': 4.5,
-            'L': 3.8, 'K': -3.9, 'M': 1.9, 'F': 2.8, 'P': -1.6,
-            'S': -0.8, 'T': -0.7, 'W': -0.9, 'Y': -1.3, 'V': 4.2
-        }
-        
-        # Charge at physiological pH
-        self.charge = {
-            'A': 0, 'R': 1, 'N': 0, 'D': -1, 'C': 0,
-            'Q': 0, 'E': -1, 'G': 0, 'H': 0.1, 'I': 0,
-            'L': 0, 'K': 1, 'M': 0, 'F': 0, 'P': 0,
-            'S': 0, 'T': 0, 'W': 0, 'Y': 0, 'V': 0
-        }
-        
-        # Volume (Å³)
-        self.volume = {
-            'A': 88.6, 'R': 173.4, 'N': 114.1, 'D': 111.1, 'C': 108.5,
-            'Q': 143.8, 'E': 138.4, 'G': 60.1, 'H': 153.2, 'I': 166.7,
-            'L': 166.7, 'K': 168.6, 'M': 162.9, 'F': 189.9, 'P': 112.7,
-            'S': 89.0, 'T': 116.1, 'W': 227.8, 'Y': 193.6, 'V': 140.0
-        }
-        
-        # Secondary structure propensity
-        self.helix_propensity = {
-            'A': 1.42, 'R': 0.98, 'N': 0.67, 'D': 1.01, 'C': 0.70,
-            'Q': 1.11, 'E': 1.51, 'G': 0.57, 'H': 1.00, 'I': 1.08,
-            'L': 1.21, 'K': 1.16, 'M': 1.45, 'F': 1.13, 'P': 0.57,
-            'S': 0.77, 'T': 0.83, 'W': 1.08, 'Y': 0.69, 'V': 1.06
-        }
 
-class ProteinTarget:
-    """Represents a protein target for peptide binding"""
-    
-    def __init__(self, name: str, sequence: str, binding_site: Optional[str] = None):
-        self.name = name
-        self.sequence = sequence
-        self.binding_site = binding_site or ""
-        self.properties = self._calculate_properties()
-    
-    def _calculate_properties(self) -> Dict:
-        """Calculate protein properties"""
-        properties = {
-            'length': len(self.sequence),
-            'molecular_weight': self._calculate_mw(),
-            'isoelectric_point': self._calculate_pi(),
-            'hydrophobicity': self._calculate_hydrophobicity(),
-            'charge': self._calculate_charge()
-        }
-        return properties
-    
-    def _calculate_mw(self) -> float:
-        """Calculate molecular weight"""
-        if BIOPYTHON_AVAILABLE:
-            return ProteinAnalysis(self.sequence).molecular_weight()
-        else:
-            # Simplified calculation
-            aa_weights = {'A': 71.04, 'R': 156.10, 'N': 114.04, 'D': 115.03, 'C': 103.01}
-            return sum(aa_weights.get(aa, 110.0) for aa in self.sequence)
-    
-    def _calculate_pi(self) -> float:
-        """Calculate isoelectric point"""
-        if BIOPYTHON_AVAILABLE:
-            return ProteinAnalysis(self.sequence).isoelectric_point()
-        else:
-            return 7.0  # Default neutral pH
-    
-    def _calculate_hydrophobicity(self) -> float:
-        """Calculate average hydrophobicity"""
-        aa_props = AminoAcidProperties()
-        return np.mean([aa_props.hydrophobicity.get(aa, 0) for aa in self.sequence])
-    
-    def _calculate_charge(self) -> float:
-        """Calculate net charge"""
-        aa_props = AminoAcidProperties()
-        return sum(aa_props.charge.get(aa, 0) for aa in self.sequence)
+
+
+
+
+
+
+
+
+# Mis  librerias
+from Peptide_sequence_lib import *
 
 class VQEResult:
     '''
@@ -276,141 +193,6 @@ class VQEResult:
                 "degrees": param * 180 / np.pi
             }
         return formatted_params
-
-class QuantumOptimizer:
-    """Quantum optimizer using VQE (Qiskit 2.x, manual classical optimizer)"""
-    
-    def __init__(self, use_simulator: bool = True):
-        self.use_simulator = use_simulator
-
-    def calculate_energy(self, sequence: str, constraints: Dict) -> float:
-        """
-        Calcula la energía de una secuencia de péptido usando las mismas reglas que el modo cuántico.
-        Puedes ajustar la lógica según tus constraints y propiedades.
-        """
-        aa_props = AminoAcidProperties()
-        energy = 0.0
-        # Binding affinity term (hidrofobicidad)
-        for aa in sequence:
-            energy -= constraints.get('hydrophobic_reward', 0) * aa_props.hydrophobicity.get(aa, 0)
-        # Stability term (penaliza combinaciones inestables)
-        for i in range(len(sequence) - 1):
-            aa1 = sequence[i]
-            aa2 = sequence[i+1]
-            # Penalización simple: si son iguales, penaliza
-            if aa1 == aa2:
-                energy += 1.0
-        # Diversity term
-        unique_aa = len(set(sequence))
-        energy -= constraints.get('diversity_reward', 0) * unique_aa
-        return energy
-
-    def params_to_sequence(self, params, peptide_length, aa_list):
-        """
-        Mapea los parámetros del ansatz a una secuencia usando softmax por posición.
-        Cada bloque de len(aa_list) parámetros controla la probabilidad de cada aminoácido en cada posición.
-        """
-        params = np.array(params)
-        n_aa = len(aa_list)
-        params = params[:peptide_length * n_aa]
-        params = params.reshape((peptide_length, n_aa))
-        exp_params = np.exp(params - np.max(params, axis=1, keepdims=True))
-        probs = exp_params / np.sum(exp_params, axis=1, keepdims=True)
-        idxs = np.argmax(probs, axis=1)
-        sequence = ''.join([aa_list[i] for i in idxs])
-        return sequence
-
-    def optimize_peptide(self, peptide_length: int, constraints: Dict, num_reads: int = 10000, use_classical: bool = False, maxiter_cobyla: int = 100, optimizer: str = 'COBYLA', use_qaoa: bool = False) -> List[Dict]:
-        """
-        Optimiza el péptido usando método cuántico (VQE manual) o clásico (random search).
-        :param optimizer: 'COBYLA' o 'differential_evolution'
-        """
-        # Fijar semilla para reproducibilidad
-        np.random.seed(42)
-        n_aminoacids = len(AminoAcidProperties().amino_acids)
-        n_qubits = peptide_length * n_aminoacids
-        aa_list = AminoAcidProperties().amino_acids
-        if use_classical:
-            print("Modo: Optimización clásica (random search, reproducible, 1000 muestras)")
-            solutions = []
-            for _ in range(1000):
-                sequence = ''.join(np.random.choice(aa_list, peptide_length))
-                energy = self.calculate_energy(sequence, constraints)
-                solutions.append({
-                    'sequence': sequence,
-                    'energy': energy,
-                    'sample': {}
-                })
-            solutions.sort(key=lambda x: x['energy'])
-            return solutions
-        # --- Modo QAOA moderno (Qiskit >=1.0, sin qiskit.algorithms) ---
-        if use_qaoa:
-            print("Modo: Optimización cuántica (QAOA moderno con Qiskit primitives y QUBO simbólico eficiente)")
-            n_blocks = peptide_length
-            n_aa = n_aminoacids
-            n_qubits = n_blocks * n_aa
-            aa_list = AminoAcidProperties().amino_acids
-            # Variables: x_{p,a} para cada posición p y aminoácido a
-            # Penalización one-hot: (sum_a x_{p,a} - 1)^2
-            penalty = 5.0
-            linear = {}
-            quadratic = {}
-            # Penalización one-hot
-            for p in range(n_blocks):
-                for a in range(n_aa):
-                    idx = p * n_aa + a
-                    linear[idx] = linear.get(idx, 0) - 2 * penalty  # -2*penalty*x_{p,a}
-                    for b in range(a+1, n_aa):
-                        idx2 = p * n_aa + b
-                        quadratic[(idx, idx2)] = quadratic.get((idx, idx2), 0) + 2 * penalty  # +2*penalty*x_{p,a}*x_{p,b}
-            # Energía de la secuencia: para cada variable x_{p,a}, suma el término lineal según la energía de ese aa en esa posición
-            for p in range(n_blocks):
-                for a in range(n_aa):
-                    idx = p * n_aa + a
-                    # Construye la secuencia con aa_list[a] en la posición p, el resto 'A'
-                    seq = ['A'] * n_blocks
-                    seq[p] = aa_list[a]
-                    energy = self.calculate_energy(''.join(seq), constraints)
-                    linear[idx] = linear.get(idx, 0) + energy
-            # Construir QUBO como SparsePauliOp
-            from qiskit_optimization.converters import QuadraticProgramToQubo
-            from qiskit_optimization import QuadraticProgram
-            qp = QuadraticProgram()
-            for i in range(n_qubits):
-                qp.binary_var(name=f'x_{i}')
-            qp.minimize(linear=linear, quadratic=quadratic)
-            qubo = QuadraticProgramToQubo().convert(qp)
-            cost_operator, offset = qubo.to_ising()
-            # Ansatz QAOA
-            qaoa_ansatz = QAOAAnsatz(cost_operator, reps=3)
-            estimator = Estimator()
-            def qaoa_objective(params):
-                job = estimator.run([qaoa_ansatz], [cost_operator], [params])
-                result = job.result()
-                return result.values[0]
-            bounds = [(-2*np.pi, 2*np.pi)] * qaoa_ansatz.num_parameters
-            result = differential_evolution(qaoa_objective, bounds, maxiter=maxiter_cobyla)
-            from qiskit import QuantumCircuit
-            qc = QuantumCircuit(n_qubits)
-            qc.append(qaoa_ansatz.assign_parameters(result.x), range(n_qubits))
-            from qiskit_aer import Aer
-            backend = Aer.get_backend('aer_simulator')
-            counts = backend.run(qc.measure_all(inplace=False), shots=1024).result().get_counts()
-            best_bitstring = max(counts, key=counts.get)
-            # Mapear a secuencia
-            sequence = ''
-            for block in range(n_blocks):
-                block_bits = best_bitstring[::-1][block*n_aa:(block+1)*n_aa]
-                idx = block_bits.find('1')
-                if idx == -1:
-                    idx = 0
-                sequence += aa_list[idx]
-            return [{
-                'sequence': sequence,
-                'energy': result.fun,
-                'sample': counts,
-                'qaoa_result': result
-            }]
         # --- Modo cuántico (VQE manual) ---
         # print(f"Number of qubits (binary variables) used: {n_qubits}")
         # print(f"Modo: Optimización cuántica (VQE manual con scipy.optimize.{optimizer})")
@@ -488,11 +270,11 @@ class PeptideDesigner:
     def __init__(self, use_quantum: bool = True):
         self.use_quantum = use_quantum
         self.quantum_optimizer = QuantumOptimizer(use_simulator=not use_quantum)
-        self.aa_props = AminoAcidProperties()
+        self.aa_props = AminoAcid_Properties()
     
     def design_peptides(self, target: ProteinTarget, peptide_length: int = 10,
                        num_candidates: int = 10, constraints: Optional[Dict] = None,
-                       use_classical: bool = False, maxiter_cobyla: int = 100, optimizer: str = 'COBYLA', use_qaoa: bool = False) -> List[PeptideCandidate]:
+                       use_classical: bool = False, maxiter_cobyla: int = 100, optimizer: str = 'COBYLA', use_qaoa: bool = True) -> List[PeptideCandidate]:
         """Design peptides for a given target"""
         logger.info(f"Designing peptides for target: {target.name}")
         
@@ -647,7 +429,7 @@ class PeptideAnalyzer:
     """Analyze and visualize peptide candidates"""
     
     def __init__(self):
-        self.aa_props = AminoAcidProperties()
+        self.aa_props = AminoAcid_Properties()
     
     def analyze_candidates(self, candidates: List[PeptideCandidate]) -> Dict:
         """Comprehensive analysis of peptide candidates"""
@@ -749,7 +531,7 @@ class PeptideAnalyzer:
                     processed.add(j)
             
             clusters.append(cluster)
-        
+        print('NUMERO DE CLUSTER: ', len(clusters), clusters)
         return {
             'num_clusters': len(clusters),
             'cluster_sizes': [len(cluster) for cluster in clusters],
@@ -819,6 +601,11 @@ def main():
     parser.add_argument('--maxiter_cobyla', type=int, default=100, help='Número de iteraciones para COBYLA (solo modo quantum)')
     parser.add_argument('--num_candidates', type=int, default=10, help='Número de péptidos candidatos a obtener')
     parser.add_argument('--optimizer', choices=['COBYLA', 'differential_evolution'], default='COBYLA', help='Optimizador a usar en modo quantum')
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('--use_qaoa', dest='use_qaoa', action='store_true', help='Usar QAOA')
+    group.add_argument('--no_use_qaoa', dest='use_qaoa', action='store_false', help='No usar QAOA (usar VQE)')
+    parser.set_defaults(use_qaoa=True)
+
     args = parser.parse_args()
 
     # Define target protein
@@ -838,7 +625,8 @@ def main():
         constraints=None,
         use_classical=(args.mode == 'classical'),
         maxiter_cobyla=args.maxiter_cobyla,
-        optimizer=args.optimizer
+        optimizer=args.optimizer,
+        use_qaoa = args.use_qaoa
     )
 
     # Imprimir resultados
